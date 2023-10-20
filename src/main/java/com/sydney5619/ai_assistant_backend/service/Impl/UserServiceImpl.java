@@ -1,11 +1,14 @@
 package com.sydney5619.ai_assistant_backend.service.Impl;
 
+import com.sydney5619.ai_assistant_backend.common.Result;
 import com.sydney5619.ai_assistant_backend.exception.BusinessException;
 import com.sydney5619.ai_assistant_backend.mapper.UserMapper;
 import com.sydney5619.ai_assistant_backend.pojo.User;
 import com.sydney5619.ai_assistant_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -27,4 +30,45 @@ public class UserServiceImpl implements UserService {
 
         throw new BusinessException("Password is incorrect");
     }
+
+    @Override
+    public User getUserByUserName(String userName) {
+        User user = userMapper.getUserByUserName(userName);
+        return user;
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        List<User> userList = userMapper.getAllUsers();
+        return userList;
+    }
+
+    @Override
+    public Integer addUser(User user) {
+        User userByUserName = userMapper.getUserByUserName(user.getUserName());
+        if(userByUserName == null){
+            return userMapper.addUser(user);
+        }
+
+        throw new BusinessException("UserName has already been taken");
+    }
+
+    @Override
+    public Integer updateUser(User user) {
+        User userByUserName = userMapper.getUserByUserName(user.getUserName());
+        // 检查找到的用户是否与当前正在更新的用户是同一个用户
+        if (userByUserName != null && !userByUserName.getId().equals(user.getId())) {
+            throw new BusinessException("UserName has already been taken");
+        }
+
+        return userMapper.updateUser(user);
+
+    }
+
+    @Override
+    public Integer deleteUserByUserName(User user) {
+        return userMapper.deleteUserByUserName(user);
+    }
+
+
 }
